@@ -1,0 +1,204 @@
+services:
+  phpcli:
+    image: ${DOCKER_HUB:-headgent}/phpcli:${PHP_VERSION:-8.3}
+    container_name: phpcli
+    environment:
+      - PHP_MEMORY_LIMIT=${PHP_MEMORY_LIMIT:-512M}
+      - PHP_MAX_EXECUTION_TIME=${PHP_MAX_EXECUTION_TIME:-0}
+      - PHP_TIMEZONE=${PHP_TIMEZONE:-UTC}
+      - APCU_SHM_SIZE=${APCU_SHM_SIZE:-64M}
+      - OPCACHE_MEMORY_CONSUMPTION=${OPCACHE_MEMORY_CONSUMPTION:-128}
+      - OPCACHE_MAX_ACCELERATED_FILES=${OPCACHE_MAX_ACCELERATED_FILES:-4000}
+      - OPCACHE_REVALIDATE_FREQ=${OPCACHE_REVALIDATE_FREQ:-2}
+      - OPCACHE_JIT=${OPCACHE_JIT:-1254}
+      - OPCACHE_JIT_BUFFER_SIZE=${OPCACHE_JIT_BUFFER_SIZE:-128M}
+      - PHP_ERROR_REPORTING=${PHP_ERROR_REPORTING:-"E_ALL & ~E_DEPRECATED & ~E_STRICT"}
+      - PHP_DISPLAY_ERRORS=${PHP_DISPLAY_ERRORS:-Off}
+      - PHP_LOG_ERRORS=${PHP_LOG_ERRORS:-On}
+      - XDEBUG_MODE=${XDEBUG_MODE:-debug}
+      - XDEBUG_START_WITH_REQUEST=${XDEBUG_START_WITH_REQUEST:-yes}
+      - XDEBUG_CLIENT_HOST=${XDEBUG_CLIENT_HOST:-host.docker.internal}
+      - XDEBUG_CLIENT_PORT=${XDEBUG_CLIENT_PORT:-9003}
+      - XDEBUG_LOG_LEVEL=${XDEBUG_LOG_LEVEL:-0}
+      - PCOV_ENABLED=${PCOV_ENABLED:-0}
+      # Database connection for jardiscore/dbconnection
+      - DB_WRITER_ENABLED=${DB_WRITER_ENABLED:-true}
+      - DB_WRITER_DRIVER=${DB_WRITER_DRIVER:-mysql}
+      - DB_WRITER_HOST=${DB_WRITER_HOST:-mysql_test}
+      - DB_WRITER_PORT=${DB_WRITER_PORT:-3306}
+      - DB_WRITER_USER=${DB_WRITER_USER:-app_user}
+      - DB_WRITER_PASSWORD=${DB_WRITER_PASSWORD:-app_secret}
+      - DB_WRITER_DATABASE=${DB_WRITER_DATABASE:-test_db}
+      - DB_WRITER_CHARSET=${DB_WRITER_CHARSET:-utf8mb4}
+      - DB_WRITER_PERSISTENT=${DB_WRITER_PERSISTENT:-false}
+      # Cache configuration for jardiscore/cache
+      - CACHE_MEMORY_ENABLED=${CACHE_MEMORY_ENABLED:-false}
+      - CACHE_APCU_ENABLED=${CACHE_APCU_ENABLED:-true}
+      - CACHE_REDIS_ENABLED=${CACHE_REDIS_ENABLED:-true}
+      - CACHE_REDIS_HOST=${CACHE_REDIS_HOST:-redis_test}
+      - CACHE_REDIS_PORT=${CACHE_REDIS_PORT:-6379}
+      - CACHE_REDIS_PASSWORD=${CACHE_REDIS_PASSWORD:-}
+      - CACHE_REDIS_DATABASE=${CACHE_REDIS_DATABASE:-0}
+      - CACHE_DB_ENABLED=${CACHE_DB_ENABLED:-false}
+      - CACHE_DB_TABLE=${CACHE_DB_TABLE:-cache}
+      - CACHE_NAMESPACE=${CACHE_NAMESPACE:-integration_test}
+      # Messaging configuration for jardiscore/messaging
+      - MESSAGING_INMEMORY_ENABLED=${MESSAGING_INMEMORY_ENABLED:-false}
+      - MESSAGING_INMEMORY_PRIORITY=${MESSAGING_INMEMORY_PRIORITY:-99}
+      - MESSAGING_REDIS_ENABLED=${MESSAGING_REDIS_ENABLED:-true}
+      - MESSAGING_REDIS_HOST=${MESSAGING_REDIS_HOST:-redis_test}
+      - MESSAGING_REDIS_PORT=${MESSAGING_REDIS_PORT:-6379}
+      - MESSAGING_REDIS_PASSWORD=${MESSAGING_REDIS_PASSWORD:-}
+      - MESSAGING_REDIS_USE_STREAMS=${MESSAGING_REDIS_USE_STREAMS:-true}
+      - MESSAGING_KAFKA_ENABLED=${MESSAGING_KAFKA_ENABLED:-true}
+      - MESSAGING_KAFKA_BROKERS=${MESSAGING_KAFKA_BROKERS:-kafka_test:29092}
+      - MESSAGING_KAFKA_USERNAME=${MESSAGING_KAFKA_USERNAME:-}
+      - MESSAGING_KAFKA_PASSWORD=${MESSAGING_KAFKA_PASSWORD:-}
+      - MESSAGING_KAFKA_GROUP_ID=${MESSAGING_KAFKA_GROUP_ID:-integration_test}
+      - MESSAGING_RABBITMQ_ENABLED=${MESSAGING_RABBITMQ_ENABLED:-true}
+      - MESSAGING_RABBITMQ_HOST=${MESSAGING_RABBITMQ_HOST:-rabbitmq_test}
+      - MESSAGING_RABBITMQ_PORT=${MESSAGING_RABBITMQ_PORT:-5672}
+      - MESSAGING_RABBITMQ_USERNAME=${MESSAGING_RABBITMQ_USERNAME:-guest}
+      - MESSAGING_RABBITMQ_PASSWORD=${MESSAGING_RABBITMQ_PASSWORD:-guest}
+      - MESSAGING_RABBITMQ_QUEUE=${MESSAGING_RABBITMQ_QUEUE:-integration_test}
+    volumes:
+      - ../:/app
+    working_dir: /app
+    networks:
+      - kernel_network
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_test
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_WRITER_PASSWORD:-app_secret}
+      - MYSQL_DATABASE=${DB_WRITER_DATABASE:-test_db}
+      - MYSQL_USER=${DB_WRITER_USER:-app_user}
+      - MYSQL_PASSWORD=${DB_WRITER_PASSWORD:-app_secret}
+    ports:
+      - "${DB_WRITER_HOST_PORT:-3306}:3306"
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_WRITER_USER:-app_user}", "-p${DB_WRITER_PASSWORD:-app_secret}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    networks:
+      - kernel_network
+    profiles:
+      - test
+
+  mariadb:
+    image: mariadb:11.2
+    container_name: mariadb_test
+    environment:
+      - MARIADB_ROOT_PASSWORD=${DB_WRITER_PASSWORD:-app_secret}
+      - MARIADB_DATABASE=${DB_WRITER_DATABASE:-test_db}
+      - MARIADB_USER=${DB_WRITER_USER:-app_user}
+      - MARIADB_PASSWORD=${DB_WRITER_PASSWORD:-app_secret}
+    ports:
+      - "${DB_MARIADB_HOST_PORT:-3308}:3306"
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    networks:
+      - kernel_network
+    profiles:
+      - test
+
+  postgres:
+    image: postgres:16
+    container_name: postgres_test
+    environment:
+      - POSTGRES_DB=${DB_WRITER_DATABASE:-test_db}
+      - POSTGRES_USER=${DB_WRITER_USER:-app_user}
+      - POSTGRES_PASSWORD=${DB_WRITER_PASSWORD:-app_secret}
+    ports:
+      - "${DB_POSTGRES_HOST_PORT:-5432}:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_WRITER_USER:-app_user} -d ${DB_WRITER_DATABASE:-test_db}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    networks:
+      - kernel_network
+    profiles:
+      - test
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_test
+    ports:
+      - "${CACHE_REDIS_HOST_PORT:-6380}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - kernel_network
+    profiles:
+      - test
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka_test
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka_test:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka_test:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    ports:
+      - "${MESSAGING_KAFKA_HOST_PORT:-9092}:9092"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - kernel_network
+    profiles:
+      - test
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq_test
+    environment:
+      - RABBITMQ_DEFAULT_USER=${MESSAGING_RABBITMQ_USERNAME:-guest}
+      - RABBITMQ_DEFAULT_PASS=${MESSAGING_RABBITMQ_PASSWORD:-guest}
+    ports:
+      - "${MESSAGING_RABBITMQ_HOST_PORT:-5672}:5672"
+      - "${MESSAGING_RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - kernel_network
+    profiles:
+      - test
+
+networks:
+  kernel_network:
+    driver: bridge
+    name: kernel_network
