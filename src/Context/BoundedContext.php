@@ -51,7 +51,7 @@ class BoundedContext implements BoundedContextInterface
                     $version,
                     $this->getResource(),
                     $this->getRequest(),
-                    $parameters
+                    ...$parameters
                 );
             }
 
@@ -84,16 +84,14 @@ class BoundedContext implements BoundedContextInterface
         if ($this->response === null) {
             $context = basename(str_replace('\\', '/', get_class($this)));
             $request = $this->getRequest();
-            if ($request === null) {
-                throw new Exception('Domain request is required to create response');
-            }
+            $version = $request !== null ? $request->version : '';
             $factory = $this->getResource()->getFactory();
             if ($factory === null) {
                 throw new Exception('Factory not available');
             }
             $response = $factory->get(
                 Response::class,
-                $request->version,
+                $version,
                 $context
             );
             if (!$response instanceof ResponseInterface) {
