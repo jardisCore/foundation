@@ -1,7 +1,6 @@
 {
     "name": "jardiscore/foundation",
     "description": "DDD Foundation for PHP - Domain orchestration with zero-config infrastructure services",
-    "version": "1.0.0",
     "type": "library",
     "license": "PolyForm-Noncommercial-1.0.0",
     "minimum-stability": "stable",
