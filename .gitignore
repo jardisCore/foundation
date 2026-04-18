@@ -1,0 +1,16 @@
+.DS_Store
+.idea/
+docs/
+
+vendor/
+composer.lock
+tests/reports/
+
+*.tmp
+*.cache
+*.log
+.env
+*.key
+.claude/CLAUDE.md
+.claude/settings.local.json
+.claude/cache/
