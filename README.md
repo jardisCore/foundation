@@ -10,29 +10,29 @@
 [![PSR-16](https://img.shields.io/badge/PSR--16-Simple%20Cache-blue.svg)](https://www.php-fig.org/psr/psr-16/)
 [![PSR-18](https://img.shields.io/badge/PSR--18-HTTP%20Client-blue.svg)](https://www.php-fig.org/psr/psr-18/)
 
-> Part of the **[Jardis Business Platform](https://jardis.io)** — Enterprise-grade PHP components for Domain-Driven Design
+> Part of **[Jardis](https://jardis.io)** — the Domain-Driven Design platform for PHP. You model your domain; Jardis generates the production-ready hexagonal code (DTOs, Command/Query handlers, repositories, persistence). This package is part of the open-source foundation that generated code runs on.
 
 ---
 
 ## The Integration Platform for Jardis DDD Projects
 
-**Jardis Foundation** is the runtime heart of every Jardis DDD project. It connects the full power of the Jardis ecosystem — database connections, caching, logging, event dispatching, HTTP communication — into a single, ENV-driven entry point.
+**Jardis Foundation** is the runtime heart of every Jardis DDD project and the ENV-driven entry point for hexagonal architecture in PHP. It provides the DDD building blocks — database connections, caching, logging, event dispatching, HTTP communication — assembled automatically from a single `.env` file.
 
-When you generate a DDD project with the **Jardis Builder**, the resulting code extends `JardisApp`. Foundation takes care of assembling all infrastructure services so your domain code stays clean, portable and focused on business logic.
+When Jardis generates a DDD project, the resulting code extends `JardisApp`. Foundation takes care of assembling all infrastructure services so your domain code stays clean, portable and focused on business logic.
 
 ### What Foundation delivers
 
 - **Pure Hexagonal Architecture** — your domain core has zero knowledge of infrastructure. Foundation wires adapters behind PSR interfaces, respecting the Dependency Inversion Principle at every layer.
-- **Seamless Builder Integration** — the Jardis Builder generates BoundedContexts, Aggregates, Repositories and Commands that run on Foundation out of the box. No manual wiring, no bootstrap ceremony.
+- **Built for generated code** — Jardis generates BoundedContexts, Aggregates, Repositories and Commands that run on Foundation out of the box. No manual wiring, no bootstrap ceremony.
 - **Jardis Ecosystem in one place** — Foundation brings together 8+ specialized Jardis packages (Kernel, Cache, DbConnection, Logger, EventDispatcher, HTTP, Mailer, Filesystem) through a unified ENV configuration. Install what you need, ignore what you don't.
 - **Convention over Configuration** — a single `.env` file replaces hundreds of lines of container configuration. Every service auto-assembles from environment variables.
 - **PSR-compliant throughout** — PSR-3 (Logger), PSR-14 (Event Dispatcher), PSR-16 (Cache), PSR-18 (HTTP Client). Your domain code depends on standards, never on implementations.
 
-### From Builder to running application
+### From generated code to running application
 
 ```
-Jardis Builder                     Jardis Foundation
-─────────────                      ─────────────────
+Jardis (development-time)          Jardis Foundation
+─────────────────────────          ─────────────────
 Generates:                         Provides at runtime:
   BoundedContexts                    Database (PDO / ConnectionPool)
   Aggregates + Entities              Redis (shared connection)
@@ -55,7 +55,7 @@ Generates:                         Provides at runtime:
 | **Package** | `jardiscore/kernel` | `jardiscore/foundation` |
 | **Dependencies** | Only Kernel + PSR interfaces | Kernel + optional adapters |
 | **Services** | Override hooks manually | Hooks filled from ENV |
-| **Use when** | Full control, own infrastructure | Jardis ecosystem, Builder projects |
+| **Use when** | Full control, own infrastructure | Jardis ecosystem, generated projects |
 
 ```php
 // Full control — wire everything yourself:
