@@ -1,7 +1,7 @@
 {
     "name": "jardiscore/foundation",
     "homepage": "https://docs.jardis.io/en/core/foundation",
-    "description": "Jardis Foundation — thin convenience layer that builds DDD services from ENV",
+    "description": "ENV-driven integration platform for PHP — wires DB, cache, logger, events, HTTP, mail and filesystem into ready-to-use services; the runtime foundation that Jardis-generated DDD code runs on",
     "type": "library",
     "license": "MIT",
     "minimum-stability": "stable",
@@ -62,9 +62,13 @@
     "keywords": [
         "domain",
         "foundation",
-        "domain driven design",
+        "integration-platform",
+        "domain-driven-design",
+        "hexagonal-architecture",
+        "code-generation",
+        "ddd",
+        "php",
         "jardis",
-        "Headgent",
-        "ddd"
+        "Headgent"
     ]
 }
