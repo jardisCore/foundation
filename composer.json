@@ -1,6 +1,6 @@
 {
     "name": "jardiscore/foundation",
-    "homepage": "https://docs.jardis.io/en/core/foundation",
+    "homepage": "https://jardis.io",
     "description": "ENV-driven integration platform for PHP — wires DB, cache, logger, events, HTTP, mail and filesystem into ready-to-use services; the runtime foundation that Jardis-generated DDD code runs on",
     "type": "library",
     "license": "MIT",
@@ -57,6 +57,7 @@
     },
     "support": {
         "issues": "https://github.com/jardisCore/foundation/issues",
+        "docs": "https://docs.jardis.io/en/core/foundation",
         "email": "jardisDev@headgent.com"
     },
     "keywords": [
@@ -69,6 +70,6 @@
         "ddd",
         "php",
         "jardis",
-        "Headgent"
+        "headgent"
     ]
 }
